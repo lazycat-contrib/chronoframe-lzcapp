@@ -1,0 +1,18 @@
+package: community.lazycat.app.chronoframe
+name: ChronoFrame
+version: 0.0.0
+description: "Self-hosted photo gallery: browse your library on a timeline, add locations and manage albums and storage."
+min_os_version: "1.5.0"
+homepage: https://chronoframe.art/
+author: HoshinoSuzumi
+license: AGPL-3.0
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: ChronoFrame
+    description: "自托管照片库：以时间线浏览照片，标注地点，管理相册与存储。"
+  en:
+    name: ChronoFrame
+    description: "Self-hosted photo gallery: browse your library on a timeline, add locations and manage albums and storage."

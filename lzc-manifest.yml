@@ -1,0 +1,49 @@
+application:
+  subdomain: chronoframe
+  multi_instance: false
+  # The app ships its own account system (admin sign-in), so it is exposed
+  # directly and authenticates users itself.
+  public_path:
+    - /
+  upstreams:
+    - location: /
+      backend: http://chronoframe:3000/
+
+services:
+  chronoframe:
+    # upstream: ghcr.io/hoshinosuzumi/chronoframe:1.1.1
+    image: ghcr.1ms.run/hoshinosuzumi/chronoframe:1.1.1
+    environment:
+      # Admin account is provisioned from these on first start, so the in-browser
+      # setup wizard can be skipped entirely.
+      - CFRAME_ADMIN_EMAIL={{ .U.admin_email }}
+      - CFRAME_ADMIN_PASSWORD={{ .U.admin_password }}
+      - CFRAME_ADMIN_NAME=Admin
+      # Keep photos on the attached volume instead of defaulting to S3.
+      - NUXT_STORAGE_PROVIDER=local
+      - NUXT_PROVIDER_LOCAL_PATH=./data/storage
+      - NUXT_PUBLIC_APP_TITLE=ChronoFrame
+      - TZ=Asia/Shanghai
+    binds:
+      # Holds the database, settings, session secret and local photos.
+      - /lzcapp/var/data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+
+usage: |
+  ChronoFrame 是自托管的照片库：以时间线方式浏览照片，标注拍摄地点，
+  管理相册与存储后端，并提供批量上传、元数据编辑等后台功能。
+
+  - 用部署时设置的**管理员邮箱与密码**登录；本包用环境变量预置了管理员账号，
+    所以不需要再走浏览器里的初始化向导。
+  - 应用自带账号体系，所以它直接对外开放（public_path），登录与权限都由 ChronoFrame 自己负责。
+  - 照片默认保存在应用自己的持久化目录里（本地存储），
+    数据库、设置与会话密钥也在同一目录，重启不会丢失；不需要你另外准备存储服务。
+  - **地图与地名解析**使用公开的 MapLibre / OpenStreetMap 服务，需要能访问外网；
+    如需 Mapbox 或自定义地名服务，可在后续配置中自行填入令牌或地址。
+  - 未做真机验证：登录、上传与浏览照片、标注地点、管理相册以及重启后数据留存
+    均未在设备上实测。
